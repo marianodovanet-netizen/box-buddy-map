@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Crosshair, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
@@ -165,9 +165,26 @@ function NuevaNapPage() {
                 )}
                 Usar mi ubicación
               </Button>
-              <span className="font-mono text-xs text-muted-foreground">
-                {pin ? `${pin.lat.toFixed(6)}, ${pin.lng.toFixed(6)}` : "Sin coordenadas"}
-              </span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coordenadas">Coordenadas (lat, lng)</Label>
+              <Input
+                id="coordenadas"
+                value={coordText}
+                placeholder="-34.603722, -58.381592"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCoordText(value);
+                  const parsed = parseCoordinates(value);
+                  if (parsed) {
+                    setPin(parsed);
+                    setCenter(parsed);
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Podés escribir o pegar las coordenadas, o elegir el punto en el mapa.
+              </p>
             </div>
           </div>
 
