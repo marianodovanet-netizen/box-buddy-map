@@ -84,14 +84,55 @@ function MapaPage() {
               {isLoading ? "Cargando registros…" : `${naps.length} registro(s) en total`}
             </p>
           </div>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por localidad, técnico, código…"
-              className="pl-9"
-            />
+          <div className="flex w-full flex-wrap items-end gap-3 sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar por localidad, técnico, código…"
+                className="pl-9"
+              />
+            </div>
+            <Select value={localidadFilter} onValueChange={setLocalidadFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Todas las localidades" />
+              </SelectTrigger>
+              <SelectContent>
+                {LOCALIDADES.map((l) => (
+                  <SelectItem key={l} value={l}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={tecnicoFilter} onValueChange={setTecnicoFilter}>
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue placeholder="Todos los técnicos" />
+              </SelectTrigger>
+              <SelectContent>
+                {TECNICOS.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(localidadFilter || tecnicoFilter || q) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setLocalidadFilter("");
+                  setTecnicoFilter("");
+                  setQ("");
+                }}
+              >
+                <X className="size-4" />
+                Limpiar
+              </Button>
+            )}
           </div>
         </div>
 
