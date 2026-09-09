@@ -1,14 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Calendar, Camera, MapPin, Search, User } from "lucide-react";
+import { Calendar, Camera, MapPin, Search, User, X } from "lucide-react";
 
 import { AppHeader } from "@/components/nap/AppHeader";
 import { GoogleMapCanvas } from "@/components/nap/GoogleMapCanvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { fetchNaps, type Nap } from "@/lib/naps";
+import { LOCALIDADES, TECNICOS } from "@/lib/naps-constants";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/mapa")({
