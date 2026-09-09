@@ -45,6 +45,7 @@ function NuevaNapPage() {
 
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const [coordText, setCoordText] = useState("");
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -56,6 +57,11 @@ function NuevaNapPage() {
   const [direccion, setDireccion] = useState("");
   const [trabajo, setTrabajo] = useState("");
   const [observaciones, setObservaciones] = useState("");
+
+  // Keep the coordinate text input in sync with the selected pin.
+  useEffect(() => {
+    setCoordText(pin ? `${pin.lat.toFixed(6)}, ${pin.lng.toFixed(6)}` : "");
+  }, [pin]);
 
   async function applyPoint(lat: number, lng: number) {
     setPin({ lat, lng });
