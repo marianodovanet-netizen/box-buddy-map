@@ -12,7 +12,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4">
-        <Link to="/_authenticated/mapa" className="flex items-center gap-2">
+        <Link to="/mapa" className="flex items-center gap-2">
           <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
             <MapPin className="size-5" />
           </span>
@@ -23,7 +23,7 @@ export function AppHeader() {
 
         <nav className="ml-4 hidden items-center gap-1 sm:flex">
           <Link
-            to="/_authenticated/mapa"
+            to="/mapa"
             className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground [&.active]:bg-accent [&.active]:text-accent-foreground"
           >
             Mapa y registros
@@ -33,7 +33,7 @@ export function AppHeader() {
         <div className="ml-auto flex items-center gap-2">
           <span className="hidden text-sm text-muted-foreground md:inline">{nombre}</span>
           <Button asChild size="sm">
-            <Link to="/_authenticated/nueva">
+            <Link to="/nueva">
               <Plus className="size-4" />
               Nueva NAP
             </Link>

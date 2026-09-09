@@ -40,7 +40,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/_authenticated/mapa" });
+      if (data.session) navigate({ to: "/mapa" });
     });
   }, [navigate]);
 
@@ -53,7 +53,7 @@ function AuthPage() {
       toast.error("No pudimos ingresar", { description: error.message });
       return;
     }
-    navigate({ to: "/_authenticated/mapa" });
+    navigate({ to: "/mapa" });
   }
 
   async function signUp(e: React.FormEvent) {
@@ -73,7 +73,7 @@ function AuthPage() {
       return;
     }
     toast.success("Cuenta creada", { description: "Ya podés empezar a registrar NAP." });
-    navigate({ to: "/_authenticated/mapa" });
+    navigate({ to: "/mapa" });
   }
 
   async function google() {
@@ -85,7 +85,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/_authenticated/mapa" });
+    navigate({ to: "/mapa" });
   }
 
   return (
