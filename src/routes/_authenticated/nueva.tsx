@@ -37,6 +37,21 @@ export const Route = createFileRoute("/_authenticated/nueva")({
   component: NuevaNapPage,
 });
 
+function parseCoordinates(text: string): { lat: number; lng: number } | null {
+  const cleaned = text
+    .trim()
+    .replace(/[\u00b0\u2019\u201d\u0027]/g, " ")
+    .replace(/[NS]/gi, (m) => (m.toUpperCase() === "S" ? "-" : ""))
+    .replace(/[EW]/gi, (m) => (m.toUpperCase() === "W" ? "-" : ""));
+  const parts = cleaned.split(/[,;\s]+/).filter(Boolean);
+  if (parts.length < 2) return null;
+  const lat = Number(parts[0]);
+  const lng = Number(parts[1]);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
 function NuevaNapPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
