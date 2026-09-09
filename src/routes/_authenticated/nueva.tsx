@@ -249,12 +249,22 @@ function NuevaNapPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="tecnico">Técnico</Label>
-                <Input
-                  id="tecnico"
+                <Select
                   value={tecnico}
-                  onChange={(e) => setTecnico(e.target.value)}
-                  placeholder={nombre || "Nombre"}
-                />
+                  onValueChange={(value) => setTecnico(value)}
+                  required
+                >
+                  <SelectTrigger id="tecnico" className="w-full">
+                    <SelectValue placeholder="Seleccionar técnico" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TECNICOS.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fecha">Fecha</Label>
