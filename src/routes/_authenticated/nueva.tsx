@@ -21,33 +21,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { reverseGeocode } from "@/lib/geo.functions";
+import { LOCALIDADES, TECNICOS } from "@/lib/naps-constants";
 import { uploadPhotos } from "@/lib/naps";
-
-const LOCALIDADES = [
-  "BELLA VISTA",
-  "CAMPO HERRERA",
-  "CHAÑARITO",
-  "FAMAILLÁ",
-  "LOS AGUIRRES",
-  "LULES",
-  "SAN PABLO",
-];
-
-const TECNICOS = [
-  "ACEVEDO GASTON",
-  "AQUINO OMAR",
-  "BARRIONUEVO MANUEL",
-  "BLANCO JUAN PABLO",
-  "CAROL SEBASTIAN",
-  "FERNANDEZ MAURO",
-  "GONZALEZ EMANUEL",
-  "GONZALEZ SANTIAGO",
-  "GUCHEA MIGUEL",
-  "PEREZ EMANUEL",
-  "RITTI JESUS",
-  "ROBLES BRUNO",
-  "VERA LEONEL",
-];
 
 export const Route = createFileRoute("/_authenticated/nueva")({
   head: () => ({

@@ -1,14 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Calendar, Camera, MapPin, Search, User } from "lucide-react";
+import { Calendar, Camera, MapPin, Search, User, X } from "lucide-react";
 
 import { AppHeader } from "@/components/nap/AppHeader";
 import { GoogleMapCanvas } from "@/components/nap/GoogleMapCanvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { fetchNaps, type Nap } from "@/lib/naps";
+import { LOCALIDADES, TECNICOS } from "@/lib/naps-constants";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/mapa")({
@@ -34,19 +42,25 @@ export const Route = createFileRoute("/_authenticated/mapa")({
 
 function MapaPage() {
   const [q, setQ] = useState("");
+  const [localidadFilter, setLocalidadFilter] = useState<string>("");
+  const [tecnicoFilter, setTecnicoFilter] = useState<string>("");
   const [selected, setSelected] = useState<string | null>(null);
 
   const { data: naps = [], isLoading } = useQuery({ queryKey: ["naps"], queryFn: fetchNaps });
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return naps;
-    return naps.filter((n) =>
-      [n.codigo, n.tecnico, n.localidad, n.direccion, n.trabajo_realizado]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(term)),
-    );
-  }, [naps, q]);
+    return naps.filter((n) => {
+      const matchesText =
+        !term ||
+        [n.codigo, n.tecnico, n.localidad, n.direccion, n.trabajo_realizado]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(term));
+      const matchesLocalidad = !localidadFilter || n.localidad === localidadFilter;
+      const matchesTecnico = !tecnicoFilter || n.tecnico === tecnicoFilter;
+      return matchesText && matchesLocalidad && matchesTecnico;
+    });
+  }, [naps, q, localidadFilter, tecnicoFilter]);
 
   const markers = filtered.map((n) => ({
     id: n.id,
@@ -70,14 +84,55 @@ function MapaPage() {
               {isLoading ? "Cargando registros…" : `${naps.length} registro(s) en total`}
             </p>
           </div>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por localidad, técnico, código…"
-              className="pl-9"
-            />
+          <div className="flex w-full flex-wrap items-end gap-3 sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar por localidad, técnico, código…"
+                className="pl-9"
+              />
+            </div>
+            <Select value={localidadFilter} onValueChange={setLocalidadFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Todas las localidades" />
+              </SelectTrigger>
+              <SelectContent>
+                {LOCALIDADES.map((l) => (
+                  <SelectItem key={l} value={l}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={tecnicoFilter} onValueChange={setTecnicoFilter}>
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue placeholder="Todos los técnicos" />
+              </SelectTrigger>
+              <SelectContent>
+                {TECNICOS.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(localidadFilter || tecnicoFilter || q) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setLocalidadFilter("");
+                  setTecnicoFilter("");
+                  setQ("");
+                }}
+              >
+                <X className="size-4" />
+                Limpiar
+              </Button>
+            )}
           </div>
         </div>
 
