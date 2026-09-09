@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Crosshair, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +37,21 @@ export const Route = createFileRoute("/_authenticated/nueva")({
   component: NuevaNapPage,
 });
 
+function parseCoordinates(text: string): { lat: number; lng: number } | null {
+  const cleaned = text
+    .trim()
+    .replace(/[\u00b0\u2019\u201d\u0027]/g, " ")
+    .replace(/[NS]/gi, (m) => (m.toUpperCase() === "S" ? "-" : ""))
+    .replace(/[EW]/gi, (m) => (m.toUpperCase() === "W" ? "-" : ""));
+  const parts = cleaned.split(/[,;\s]+/).filter(Boolean);
+  if (parts.length < 2) return null;
+  const lat = Number(parts[0]);
+  const lng = Number(parts[1]);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
 function NuevaNapPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -45,6 +60,7 @@ function NuevaNapPage() {
 
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const [coordText, setCoordText] = useState("");
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -56,6 +72,11 @@ function NuevaNapPage() {
   const [direccion, setDireccion] = useState("");
   const [trabajo, setTrabajo] = useState("");
   const [observaciones, setObservaciones] = useState("");
+
+  // Keep the coordinate text input in sync with the selected pin.
+  useEffect(() => {
+    setCoordText(pin ? `${pin.lat.toFixed(6)}, ${pin.lng.toFixed(6)}` : "");
+  }, [pin]);
 
   async function applyPoint(lat: number, lng: number) {
     setPin({ lat, lng });
@@ -159,9 +180,26 @@ function NuevaNapPage() {
                 )}
                 Usar mi ubicación
               </Button>
-              <span className="font-mono text-xs text-muted-foreground">
-                {pin ? `${pin.lat.toFixed(6)}, ${pin.lng.toFixed(6)}` : "Sin coordenadas"}
-              </span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coordenadas">Coordenadas (lat, lng)</Label>
+              <Input
+                id="coordenadas"
+                value={coordText}
+                placeholder="-34.603722, -58.381592"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCoordText(value);
+                  const parsed = parseCoordinates(value);
+                  if (parsed) {
+                    setPin(parsed);
+                    setCenter(parsed);
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Podés escribir o pegar las coordenadas, o elegir el punto en el mapa.
+              </p>
             </div>
           </div>
 
