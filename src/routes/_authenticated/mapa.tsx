@@ -42,19 +42,25 @@ export const Route = createFileRoute("/_authenticated/mapa")({
 
 function MapaPage() {
   const [q, setQ] = useState("");
+  const [localidadFilter, setLocalidadFilter] = useState<string>("");
+  const [tecnicoFilter, setTecnicoFilter] = useState<string>("");
   const [selected, setSelected] = useState<string | null>(null);
 
   const { data: naps = [], isLoading } = useQuery({ queryKey: ["naps"], queryFn: fetchNaps });
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return naps;
-    return naps.filter((n) =>
-      [n.codigo, n.tecnico, n.localidad, n.direccion, n.trabajo_realizado]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(term)),
-    );
-  }, [naps, q]);
+    return naps.filter((n) => {
+      const matchesText =
+        !term ||
+        [n.codigo, n.tecnico, n.localidad, n.direccion, n.trabajo_realizado]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(term));
+      const matchesLocalidad = !localidadFilter || n.localidad === localidadFilter;
+      const matchesTecnico = !tecnicoFilter || n.tecnico === tecnicoFilter;
+      return matchesText && matchesLocalidad && matchesTecnico;
+    });
+  }, [naps, q, localidadFilter, tecnicoFilter]);
 
   const markers = filtered.map((n) => ({
     id: n.id,
