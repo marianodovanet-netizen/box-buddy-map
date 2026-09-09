@@ -279,12 +279,22 @@ function NuevaNapPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="localidad">Localidad</Label>
-              <Input
-                id="localidad"
-                required
+              <Select
                 value={localidad}
-                onChange={(e) => setLocalidad(e.target.value)}
-              />
+                onValueChange={(value) => setLocalidad(value)}
+                required
+              >
+                <SelectTrigger id="localidad" className="w-full">
+                  <SelectValue placeholder="Seleccionar localidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCALIDADES.map((l) => (
+                    <SelectItem key={l} value={l}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="direccion">Dirección</Label>
