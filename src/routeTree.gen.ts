@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
+import { Route as AuthenticatedNuevaRouteImport } from './routes/_authenticated/nueva'
 import { Route as AuthenticatedRegistroIdRouteImport } from './routes/_authenticated/registro.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -34,6 +35,11 @@ const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
   path: '/mapa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNuevaRoute = AuthenticatedNuevaRouteImport.update({
+  id: '/nueva',
+  path: '/nueva',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRegistroIdRoute = AuthenticatedRegistroIdRouteImport.update({
   id: '/registro/$id',
   path: '/registro/$id',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/nueva': typeof AuthenticatedNuevaRoute
   '/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/nueva': typeof AuthenticatedNuevaRoute
   '/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
+  '/_authenticated/nueva': typeof AuthenticatedNuevaRoute
   '/_authenticated/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/mapa' | '/registro/$id'
+  fullPaths: '/' | '/auth' | '/mapa' | '/nueva' | '/registro/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/mapa' | '/registro/$id'
+  to: '/' | '/auth' | '/mapa' | '/nueva' | '/registro/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/mapa'
+    | '/_authenticated/nueva'
     | '/_authenticated/registro/$id'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMapaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/nueva': {
+      id: '/_authenticated/nueva'
+      path: '/nueva'
+      fullPath: '/nueva'
+      preLoaderRoute: typeof AuthenticatedNuevaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/registro/$id': {
       id: '/_authenticated/registro/$id'
       path: '/registro/$id'
@@ -122,11 +139,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
+  AuthenticatedNuevaRoute: typeof AuthenticatedNuevaRoute
   AuthenticatedRegistroIdRoute: typeof AuthenticatedRegistroIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
+  AuthenticatedNuevaRoute: AuthenticatedNuevaRoute,
   AuthenticatedRegistroIdRoute: AuthenticatedRegistroIdRoute,
 }
 

@@ -37,7 +37,9 @@ export async function signedPhotoUrls(paths: string[]): Promise<string[]> {
   if (paths.length === 0) return [];
   const { data, error } = await supabase.storage.from("nap-fotos").createSignedUrls(paths, 3600);
   if (error) throw error;
-  return (data ?? []).map((d) => d.signedUrl).filter(Boolean);
+  return (data ?? [])
+    .map((d) => d.signedUrl)
+    .filter((u): u is string => typeof u === "string" && u.length > 0);
 }
 
 export async function uploadPhotos(userId: string, files: File[]): Promise<string[]> {
