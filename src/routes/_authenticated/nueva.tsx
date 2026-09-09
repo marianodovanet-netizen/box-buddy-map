@@ -249,12 +249,22 @@ function NuevaNapPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="tecnico">Técnico</Label>
-                <Input
-                  id="tecnico"
+                <Select
                   value={tecnico}
-                  onChange={(e) => setTecnico(e.target.value)}
-                  placeholder={nombre || "Nombre"}
-                />
+                  onValueChange={(value) => setTecnico(value)}
+                  required
+                >
+                  <SelectTrigger id="tecnico" className="w-full">
+                    <SelectValue placeholder="Seleccionar técnico" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TECNICOS.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fecha">Fecha</Label>
@@ -269,12 +279,22 @@ function NuevaNapPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="localidad">Localidad</Label>
-              <Input
-                id="localidad"
-                required
+              <Select
                 value={localidad}
-                onChange={(e) => setLocalidad(e.target.value)}
-              />
+                onValueChange={(value) => setLocalidad(value)}
+                required
+              >
+                <SelectTrigger id="localidad" className="w-full">
+                  <SelectValue placeholder="Seleccionar localidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCALIDADES.map((l) => (
+                    <SelectItem key={l} value={l}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="direccion">Dirección</Label>
