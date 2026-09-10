@@ -14,11 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      nap_historial: {
+        Row: {
+          accion: string
+          actor_nombre: string | null
+          cambios: Json
+          created_at: string
+          id: string
+          nap_id: string
+          user_id: string | null
+        }
+        Insert: {
+          accion: string
+          actor_nombre?: string | null
+          cambios?: Json
+          created_at?: string
+          id?: string
+          nap_id: string
+          user_id?: string | null
+        }
+        Update: {
+          accion?: string
+          actor_nombre?: string | null
+          cambios?: Json
+          created_at?: string
+          id?: string
+          nap_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nap_historial_nap_id_fkey"
+            columns: ["nap_id"]
+            isOneToOne: false
+            referencedRelation: "naps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       naps: {
         Row: {
           codigo: string | null
           created_at: string
           direccion: string
+          estado: string
           fecha: string
           fotos: string[]
           id: string
@@ -35,6 +74,7 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           direccion: string
+          estado?: string
           fecha?: string
           fotos?: string[]
           id?: string
@@ -51,6 +91,7 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           direccion?: string
+          estado?: string
           fecha?: string
           fotos?: string[]
           id?: string
@@ -94,7 +135,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      jsonb_object_keys_count: { Args: { j: Json }; Returns: number }
     }
     Enums: {
       [_ in never]: never

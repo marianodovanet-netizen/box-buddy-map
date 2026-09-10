@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedNuevaRouteImport } from './routes/_authenticated/nueva'
+import { Route as AuthenticatedEditarIdRouteImport } from './routes/_authenticated/editar.$id'
 import { Route as AuthenticatedRegistroIdRouteImport } from './routes/_authenticated/registro.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +41,11 @@ const AuthenticatedNuevaRoute = AuthenticatedNuevaRouteImport.update({
   path: '/nueva',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEditarIdRoute = AuthenticatedEditarIdRouteImport.update({
+  id: '/editar/$id',
+  path: '/editar/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRegistroIdRoute = AuthenticatedRegistroIdRouteImport.update({
   id: '/registro/$id',
   path: '/registro/$id',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/nueva': typeof AuthenticatedNuevaRoute
+  '/editar/$id': typeof AuthenticatedEditarIdRoute
   '/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +65,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/nueva': typeof AuthenticatedNuevaRoute
+  '/editar/$id': typeof AuthenticatedEditarIdRoute
   '/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,15 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
   '/_authenticated/nueva': typeof AuthenticatedNuevaRoute
+  '/_authenticated/editar/$id': typeof AuthenticatedEditarIdRoute
   '/_authenticated/registro/$id': typeof AuthenticatedRegistroIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/mapa' | '/nueva' | '/registro/$id'
+  fullPaths:
+    '/' | '/auth' | '/mapa' | '/nueva' | '/editar/$id' | '/registro/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/mapa' | '/nueva' | '/registro/$id'
+  to: '/' | '/auth' | '/mapa' | '/nueva' | '/editar/$id' | '/registro/$id'
   id:
     | '__root__'
     | '/'
@@ -81,6 +91,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/mapa'
     | '/_authenticated/nueva'
+    | '/_authenticated/editar/$id'
     | '/_authenticated/registro/$id'
   fileRoutesById: FileRoutesById
 }
@@ -127,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNuevaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/editar/$id': {
+      id: '/_authenticated/editar/$id'
+      path: '/editar/$id'
+      fullPath: '/editar/$id'
+      preLoaderRoute: typeof AuthenticatedEditarIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/registro/$id': {
       id: '/_authenticated/registro/$id'
       path: '/registro/$id'
@@ -140,12 +158,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
   AuthenticatedNuevaRoute: typeof AuthenticatedNuevaRoute
+  AuthenticatedEditarIdRoute: typeof AuthenticatedEditarIdRoute
   AuthenticatedRegistroIdRoute: typeof AuthenticatedRegistroIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
   AuthenticatedNuevaRoute: AuthenticatedNuevaRoute,
+  AuthenticatedEditarIdRoute: AuthenticatedEditarIdRoute,
   AuthenticatedRegistroIdRoute: AuthenticatedRegistroIdRoute,
 }
 
