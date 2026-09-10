@@ -1,30 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Crosshair, Loader2, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 
 import { AppHeader } from "@/components/nap/AppHeader";
-import { GoogleMapCanvas } from "@/components/nap/GoogleMapCanvas";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { reverseGeocode } from "@/lib/geo.functions";
-import { LOCALIDADES, TECNICOS } from "@/lib/naps-constants";
-import { uploadPhotos } from "@/lib/naps";
+import { NapForm } from "@/components/nap/NapForm";
+import { fetchNap } from "@/lib/naps";
+
+type NuevaSearch = { copiar?: string };
 
 export const Route = createFileRoute("/_authenticated/nueva")({
+  validateSearch: (search: Record<string, unknown>): NuevaSearch =>
+    typeof search["copiar"] === "string" && search["copiar"]
+      ? { copiar: search["copiar"] }
+      : {},
   head: () => ({
     meta: [
       { title: "Registrar caja NAP reparada | Dovanet" },
@@ -45,283 +32,29 @@ export const Route = createFileRoute("/_authenticated/nueva")({
   component: NuevaNapPage,
 });
 
-function parseCoordinates(text: string): { lat: number; lng: number } | null {
-  const cleaned = text
-    .trim()
-    .replace(/[\u00b0\u2019\u201d\u0027]/g, " ")
-    .replace(/[NS]/gi, (m) => (m.toUpperCase() === "S" ? "-" : ""))
-    .replace(/[EW]/gi, (m) => (m.toUpperCase() === "W" ? "-" : ""));
-  const parts = cleaned.split(/[,;\s]+/).filter(Boolean);
-  if (parts.length < 2) return null;
-  const lat = Number(parts[0]);
-  const lng = Number(parts[1]);
-  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-  return { lat, lng };
-}
-
 function NuevaNapPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { user, nombre } = useAuth();
-  const geocode = useServerFn(reverseGeocode);
+  const { copiar } = Route.useSearch();
 
-  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
-  const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>(undefined);
-  const [coordText, setCoordText] = useState("");
-  const [locating, setLocating] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
-
-  const [codigo, setCodigo] = useState("");
-  const [tecnico, setTecnico] = useState("");
-  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
-  const [localidad, setLocalidad] = useState("");
-  const [direccion, setDireccion] = useState("");
-  const [trabajo, setTrabajo] = useState("");
-  const [observaciones, setObservaciones] = useState("");
-
-  // Keep the coordinate text input in sync with the selected pin.
-  useEffect(() => {
-    setCoordText(pin ? `${pin.lat.toFixed(6)}, ${pin.lng.toFixed(6)}` : "");
-  }, [pin]);
-
-  async function applyPoint(lat: number, lng: number) {
-    setPin({ lat, lng });
-    setCenter({ lat, lng });
-    try {
-      const result = await geocode({ data: { lat, lng } });
-      if (result.direccion) setDireccion(result.direccion);
-      if (result.localidad) setLocalidad(result.localidad);
-    } catch {
-      // Address lookup is a convenience: the technician can type it manually.
-    }
-  }
-
-  function useMyLocation() {
-    if (!navigator.geolocation) {
-      toast.error("Este dispositivo no permite ubicación GPS");
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        void applyPoint(pos.coords.latitude, pos.coords.longitude);
-      },
-      () => {
-        setLocating(false);
-        toast.error("No pudimos obtener tu ubicación", {
-          description: "Permití el acceso al GPS o marcá el punto en el mapa.",
-        });
-      },
-      { enableHighAccuracy: true, timeout: 15000 },
-    );
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return;
-    if (!pin) {
-      toast.error("Falta la ubicación", { description: "Usá el GPS o tocá el mapa." });
-      return;
-    }
-    setSaving(true);
-    try {
-      const fotos = files.length > 0 ? await uploadPhotos(user.id, files) : [];
-      const { data, error } = await supabase
-        .from("naps")
-        .insert({
-          user_id: user.id,
-          codigo: codigo.trim() || null,
-          tecnico: tecnico.trim() || nombre,
-          fecha,
-          localidad: localidad.trim(),
-          direccion: direccion.trim(),
-          trabajo_realizado: trabajo.trim(),
-          observaciones: observaciones.trim() || null,
-          lat: pin.lat,
-          lng: pin.lng,
-          fotos,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
-      await queryClient.invalidateQueries({ queryKey: ["naps"] });
-      toast.success("NAP registrada");
-      navigate({ to: "/registro/$id", params: { id: data.id } });
-    } catch (err) {
-      toast.error("No pudimos guardar la NAP", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    } finally {
-      setSaving(false);
-    }
-  }
+  const { data: origen } = useQuery({
+    queryKey: ["nap", copiar],
+    queryFn: () => fetchNap(copiar!),
+    enabled: !!copiar,
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto w-full max-w-5xl px-4 py-6">
         <h1 className="font-display text-2xl font-semibold tracking-tight">
-          Registrar caja NAP reparada
+          {copiar ? "Duplicar caja NAP" : "Registrar caja NAP reparada"}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Marcá la ubicación, describí el trabajo y sumá las fotos de la intervención.
+          {copiar
+            ? "Los datos vienen del registro original: ajustá lo que cambie y guardá."
+            : "Marcá la ubicación, describí el trabajo y sumá las fotos de la intervención."}
         </p>
 
-        <form onSubmit={submit} className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
-          <div className="space-y-3">
-            <GoogleMapCanvas
-              pin={pin}
-              {...(center ? { center } : {})}
-              onPick={(lat, lng) => void applyPoint(lat, lng)}
-              zoom={16}
-              className="h-[360px] lg:h-[520px]"
-            />
-            <div className="flex flex-wrap items-center gap-3">
-              <Button type="button" variant="outline" onClick={useMyLocation} disabled={locating}>
-                {locating ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Crosshair className="size-4" />
-                )}
-                Usar mi ubicación
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="coordenadas">Coordenadas (lat, lng)</Label>
-              <Input
-                id="coordenadas"
-                value={coordText}
-                placeholder="-34.603722, -58.381592"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setCoordText(value);
-                  const parsed = parseCoordinates(value);
-                  if (parsed) {
-                    setPin(parsed);
-                    setCenter(parsed);
-                  }
-                }}
-              />
-              <p className="text-xs text-muted-foreground">
-                Podés escribir o pegar las coordenadas, o elegir el punto en el mapa.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="codigo">Código de la NAP</Label>
-              <Input
-                id="codigo"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                placeholder="NAP-014"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="tecnico">Técnico</Label>
-                <Select
-                  value={tecnico}
-                  onValueChange={(value) => setTecnico(value)}
-                  required
-                >
-                  <SelectTrigger id="tecnico" className="w-full">
-                    <SelectValue placeholder="Seleccionar técnico" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TECNICOS.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fecha">Fecha</Label>
-                <Input
-                  id="fecha"
-                  type="date"
-                  required
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="localidad">Localidad</Label>
-              <Select
-                value={localidad}
-                onValueChange={(value) => setLocalidad(value)}
-                required
-              >
-                <SelectTrigger id="localidad" className="w-full">
-                  <SelectValue placeholder="Seleccionar localidad" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LOCALIDADES.map((l) => (
-                    <SelectItem key={l} value={l}>
-                      {l}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="direccion">Dirección</Label>
-              <Input
-                id="direccion"
-                required
-                value={direccion}
-                onChange={(e) => setDireccion(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="trabajo">Trabajo realizado</Label>
-              <Textarea
-                id="trabajo"
-                required
-                rows={4}
-                value={trabajo}
-                onChange={(e) => setTrabajo(e.target.value)}
-                placeholder="Cambio de splitter, resplice de fibra…"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="obs">Observaciones</Label>
-              <Textarea
-                id="obs"
-                rows={3}
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fotos">Fotografías</Label>
-              <Input
-                id="fotos"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-              />
-              {files.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {files.length} foto(s) seleccionada(s)
-                </p>
-              )}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={saving}>
-              {saving ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-              Guardar registro
-            </Button>
-          </div>
-        </form>
+        <NapForm mode="crear" initial={origen ?? null} />
       </main>
     </div>
   );
