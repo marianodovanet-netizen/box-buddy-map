@@ -1,5 +1,6 @@
 /// <reference types="google.maps" />
 import { useEffect, useRef, useState } from "react";
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 import { loadGoogleMaps } from "@/lib/google-maps";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ export type MapMarker = {
   lat: number;
   lng: number;
   title?: string;
+  color?: string;
 };
 
 type Props = {
@@ -21,6 +23,7 @@ type Props = {
   zoom?: number;
   className?: string;
   fitToMarkers?: boolean;
+  cluster?: boolean;
 };
 
 // Fallback center: Argentina (Dovanet service area) until data or GPS arrives.
@@ -36,10 +39,12 @@ export function GoogleMapCanvas({
   zoom = 13,
   className,
   fitToMarkers = false,
+  cluster = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerRefs = useRef<Map<string, google.maps.Marker>>(new Map());
+  const clustererRef = useRef<MarkerClusterer | null>(null);
   const pinRef = useRef<google.maps.Marker | null>(null);
   const clickRef = useRef(onPick);
   const markerClickRef = useRef(onMarkerClick);
@@ -95,7 +100,7 @@ export function GoogleMapCanvas({
       if (!marker) {
         marker = new google.maps.Marker({
           position: { lat: m.lat, lng: m.lng },
-          map,
+          ...(cluster ? {} : { map }),
           ...(m.title ? { title: m.title } : {}),
         });
         marker.addListener("click", () => markerClickRef.current?.(m.id));
@@ -107,12 +112,20 @@ export function GoogleMapCanvas({
       marker.setIcon({
         path: google.maps.SymbolPath.CIRCLE,
         scale: active ? 11 : 8,
-        fillColor: active ? "#f59e0b" : "#1d4ed8",
+        fillColor: active ? "#f59e0b" : (m.color ?? "#1d4ed8"),
         fillOpacity: 1,
         strokeColor: "#ffffff",
         strokeWeight: 2,
       });
       marker.setZIndex(active ? 999 : 1);
+    }
+
+    if (cluster) {
+      if (!clustererRef.current) {
+        clustererRef.current = new MarkerClusterer({ map, markers: [] });
+      }
+      clustererRef.current.clearMarkers(true);
+      clustererRef.current.addMarkers(Array.from(current.values()));
     }
 
     if (fitToMarkers && markers.length > 0) {
@@ -121,7 +134,7 @@ export function GoogleMapCanvas({
       map.fitBounds(bounds, 64);
       if (markers.length === 1) map.setZoom(16);
     }
-  }, [markers, selectedId, ready, fitToMarkers]);
+  }, [markers, selectedId, ready, fitToMarkers, cluster]);
 
   // Sync draggable pin (coordinate picker)
   useEffect(() => {
