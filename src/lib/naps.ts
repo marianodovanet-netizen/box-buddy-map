@@ -10,11 +10,22 @@ export type Nap = {
   direccion: string;
   trabajo_realizado: string;
   observaciones: string | null;
+  estado: string;
   lat: number;
   lng: number;
   fotos: string[];
   created_at: string;
   updated_at: string;
+};
+
+export type NapHistorial = {
+  id: string;
+  nap_id: string;
+  user_id: string | null;
+  actor_nombre: string | null;
+  accion: string;
+  cambios: Record<string, { antes: unknown; despues: unknown }>;
+  created_at: string;
 };
 
 export async function fetchNaps(): Promise<Nap[]> {
@@ -31,6 +42,16 @@ export async function fetchNap(id: string): Promise<Nap> {
   const { data, error } = await supabase.from("naps").select("*").eq("id", id).single();
   if (error) throw error;
   return data as Nap;
+}
+
+export async function fetchHistorial(napId: string): Promise<NapHistorial[]> {
+  const { data, error } = await supabase
+    .from("nap_historial")
+    .select("*")
+    .eq("nap_id", napId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as NapHistorial[];
 }
 
 export async function signedPhotoUrls(paths: string[]): Promise<string[]> {
