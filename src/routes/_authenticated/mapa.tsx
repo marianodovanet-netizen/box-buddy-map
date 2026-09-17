@@ -1,13 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Calendar, Camera, MapPin, Search, User, X } from "lucide-react";
+import { Calendar, Camera, ChevronsUpDown, MapPin, Search, User, X } from "lucide-react";
 
 import { AppHeader } from "@/components/nap/AppHeader";
 import { GoogleMapCanvas } from "@/components/nap/GoogleMapCanvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -43,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/mapa")({
 function MapaPage() {
   const [q, setQ] = useState("");
   const [localidadFilter, setLocalidadFilter] = useState<string>("");
-  const [tecnicoFilter, setTecnicoFilter] = useState<string>("");
+  const [tecnicoFilter, setTecnicoFilter] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 
   const { data: naps = [], isLoading } = useQuery({ queryKey: ["naps"], queryFn: fetchNaps });
@@ -57,7 +64,10 @@ function MapaPage() {
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(term));
       const matchesLocalidad = !localidadFilter || n.localidad === localidadFilter;
-      const matchesTecnico = !tecnicoFilter || n.tecnico === tecnicoFilter;
+      const matchesTecnico =
+        tecnicoFilter.length === 0 ||
+        tecnicoFilter.includes(n.tecnico) ||
+        (!!n.tecnico_2 && tecnicoFilter.includes(n.tecnico_2));
       return matchesText && matchesLocalidad && matchesTecnico;
     });
   }, [naps, q, localidadFilter, tecnicoFilter]);
@@ -106,19 +116,50 @@ function MapaPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={tecnicoFilter} onValueChange={setTecnicoFilter}>
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Todos los técnicos" />
-              </SelectTrigger>
-              <SelectContent>
-                {TECNICOS.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {(localidadFilter || tecnicoFilter || q) && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between font-normal sm:w-56">
+                  <span className="truncate">
+                    {tecnicoFilter.length === 0
+                      ? "Todos los técnicos"
+                      : `${tecnicoFilter.length} técnico(s) elegido(s)`}
+                  </span>
+                  <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2" align="end">
+                <div className="max-h-72 overflow-y-auto">
+                  {TECNICOS.map((t) => (
+                    <label
+                      key={t}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                      <Checkbox
+                        checked={tecnicoFilter.includes(t)}
+                        onCheckedChange={(checked) =>
+                          setTecnicoFilter((prev) =>
+                            checked ? [...prev, t] : prev.filter((x) => x !== t),
+                          )
+                        }
+                      />
+                      {t}
+                    </label>
+                  ))}
+                </div>
+                {tecnicoFilter.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-1 w-full"
+                    onClick={() => setTecnicoFilter([])}
+                  >
+                    Quitar selección
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+            {(localidadFilter || tecnicoFilter.length > 0 || q) && (
               <Button
                 type="button"
                 variant="ghost"
@@ -178,7 +219,7 @@ function MapaPage() {
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <User className="size-3.5" />
-                    {n.tecnico}
+                    {[n.tecnico, n.tecnico_2].filter(Boolean).join(" · ")}
                   </span>
                   {n.fotos.length > 0 && (
                     <span className="inline-flex items-center gap-1">

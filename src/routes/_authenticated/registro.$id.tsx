@@ -103,6 +103,7 @@ function DetallePage() {
               />
               <div className="space-y-4">
                 <Field label="Técnico" value={nap.tecnico} />
+                {nap.tecnico_2 && <Field label="Técnico 2" value={nap.tecnico_2} />}
                 <Field
                   label="Coordenadas GPS"
                   value={`${nap.lat.toFixed(6)}, ${nap.lng.toFixed(6)}`}
