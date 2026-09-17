@@ -5,7 +5,6 @@ import { Calendar, Camera, ChevronsUpDown, MapPin, Search, User, X } from "lucid
 
 import { AppHeader } from "@/components/nap/AppHeader";
 import { GoogleMapCanvas } from "@/components/nap/GoogleMapCanvas";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -166,7 +165,7 @@ function MapaPage() {
                 size="sm"
                 onClick={() => {
                   setLocalidadFilter("");
-                  setTecnicoFilter("");
+                  setTecnicoFilter([]);
                   setQ("");
                 }}
               >
