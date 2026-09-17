@@ -65,6 +65,7 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
 
   const [codigo, setCodigo] = useState("");
   const [tecnico, setTecnico] = useState("");
+  const [tecnico2, setTecnico2] = useState("");
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
   const [localidad, setLocalidad] = useState("");
   const [direccion, setDireccion] = useState("");
@@ -78,6 +79,7 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
     if (!initial || hydrated) return;
     setCodigo(initial.codigo ?? "");
     setTecnico(initial.tecnico);
+    setTecnico2(initial.tecnico_2 ?? "");
     setLocalidad(initial.localidad);
     setDireccion(initial.direccion);
     setTrabajo(initial.trabajo_realizado);
@@ -144,6 +146,7 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
       const payload = {
         codigo: codigo.trim() || null,
         tecnico: tecnico.trim() || nombre,
+        tecnico_2: tecnico2 || null,
         fecha,
         localidad: localidad.trim(),
         direccion: direccion.trim(),
@@ -259,6 +262,25 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
               onChange={(e) => setFecha(e.target.value)}
             />
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tecnico2">Técnico 2 (opcional)</Label>
+          <Select
+            value={tecnico2 || "none"}
+            onValueChange={(v) => setTecnico2(v === "none" ? "" : v)}
+          >
+            <SelectTrigger id="tecnico2" className="w-full">
+              <SelectValue placeholder="Sin segundo técnico" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sin segundo técnico</SelectItem>
+              {TECNICOS.filter((t) => t !== tecnico).map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="localidad">Localidad</Label>

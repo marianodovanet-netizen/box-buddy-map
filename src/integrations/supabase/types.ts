@@ -66,6 +66,7 @@ export type Database = {
           localidad: string
           observaciones: string | null
           tecnico: string
+          tecnico_2: string | null
           trabajo_realizado: string
           updated_at: string
           user_id: string
@@ -83,6 +84,7 @@ export type Database = {
           localidad: string
           observaciones?: string | null
           tecnico: string
+          tecnico_2?: string | null
           trabajo_realizado: string
           updated_at?: string
           user_id: string
@@ -100,6 +102,7 @@ export type Database = {
           localidad?: string
           observaciones?: string | null
           tecnico?: string
+          tecnico_2?: string | null
           trabajo_realizado?: string
           updated_at?: string
           user_id?: string
