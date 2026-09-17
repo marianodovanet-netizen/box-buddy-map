@@ -1,0 +1,1 @@
+ALTER TABLE public.naps ADD COLUMN tecnico_2 text;
