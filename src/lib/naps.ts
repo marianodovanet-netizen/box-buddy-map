@@ -5,6 +5,7 @@ export type Nap = {
   user_id: string;
   codigo: string | null;
   tecnico: string;
+  tecnico_2: string | null;
   fecha: string;
   localidad: string;
   direccion: string;
