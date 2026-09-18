@@ -331,14 +331,20 @@ export function NapForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="trabajo">Trabajo realizado</Label>
+          <Label htmlFor="trabajo">
+            {pendiente ? "Trabajo a realizar (opcional)" : "Trabajo realizado"}
+          </Label>
           <Textarea
             id="trabajo"
-            required
+            required={!pendiente}
             rows={4}
             value={trabajo}
             onChange={(e) => setTrabajo(e.target.value)}
-            placeholder="Cambio de splitter, resplice de fibra…"
+            placeholder={
+              pendiente
+                ? "Falla detectada, qué hay que reparar…"
+                : "Cambio de splitter, resplice de fibra…"
+            }
           />
         </div>
         <div className="space-y-2">
