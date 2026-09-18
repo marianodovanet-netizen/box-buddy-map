@@ -159,7 +159,7 @@ export function NapForm({
         fecha,
         localidad: localidad.trim(),
         direccion: direccion.trim(),
-        trabajo_realizado: trabajo.trim(),
+        trabajo_realizado: trabajo.trim() || "Pendiente de reparación",
         observaciones: observaciones.trim() || null,
         estado,
         lat: pin.lat,
