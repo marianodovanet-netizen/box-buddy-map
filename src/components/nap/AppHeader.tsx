@@ -32,6 +32,12 @@ export function AppHeader() {
 
         <div className="ml-auto flex items-center gap-2">
           <span className="hidden text-sm text-muted-foreground md:inline">{nombre}</span>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/nueva" search={{ estado: "pendiente" }}>
+              <Clock className="size-4" />
+              <span className="hidden sm:inline">Pendiente</span>
+            </Link>
+          </Button>
           <Button asChild size="sm">
             <Link to="/nueva">
               <Plus className="size-4" />
