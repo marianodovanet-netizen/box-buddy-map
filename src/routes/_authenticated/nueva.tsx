@@ -5,13 +5,15 @@ import { AppHeader } from "@/components/nap/AppHeader";
 import { NapForm } from "@/components/nap/NapForm";
 import { fetchNap } from "@/lib/naps";
 
-type NuevaSearch = { copiar?: string };
+type NuevaSearch = { copiar?: string; estado?: string };
 
 export const Route = createFileRoute("/_authenticated/nueva")({
-  validateSearch: (search: Record<string, unknown>): NuevaSearch =>
-    typeof search["copiar"] === "string" && search["copiar"]
+  validateSearch: (search: Record<string, unknown>): NuevaSearch => ({
+    ...(typeof search["copiar"] === "string" && search["copiar"]
       ? { copiar: search["copiar"] }
-      : {},
+      : {}),
+    ...(search["estado"] === "pendiente" ? { estado: "pendiente" } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Registrar caja NAP reparada | Dovanet" },
