@@ -79,7 +79,8 @@ export function NapForm({
   const [direccion, setDireccion] = useState("");
   const [trabajo, setTrabajo] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [estado, setEstado] = useState<string>("finalizada");
+  const [estado, setEstado] = useState<string>(defaultEstado);
+  const pendiente = estado === "pendiente";
   const [hydrated, setHydrated] = useState(false);
 
   // Load values from the record being edited or duplicated (once).
