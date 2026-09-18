@@ -46,9 +46,17 @@ type Props = {
   initial?: Nap | null;
   /** Keep existing photos (edit) or start empty (duplicate). */
   keepPhotos?: boolean;
+  /** Initial state for new records ("pendiente" for boxes still to repair). */
+  defaultEstado?: string;
 };
 
-export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Props) {
+export function NapForm({
+  mode,
+  napId,
+  initial = null,
+  keepPhotos = false,
+  defaultEstado = "finalizada",
+}: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, nombre } = useAuth();
