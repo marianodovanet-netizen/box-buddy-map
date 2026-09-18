@@ -5,13 +5,15 @@ import { AppHeader } from "@/components/nap/AppHeader";
 import { NapForm } from "@/components/nap/NapForm";
 import { fetchNap } from "@/lib/naps";
 
-type NuevaSearch = { copiar?: string };
+type NuevaSearch = { copiar?: string; estado?: string };
 
 export const Route = createFileRoute("/_authenticated/nueva")({
-  validateSearch: (search: Record<string, unknown>): NuevaSearch =>
-    typeof search["copiar"] === "string" && search["copiar"]
+  validateSearch: (search: Record<string, unknown>): NuevaSearch => ({
+    ...(typeof search["copiar"] === "string" && search["copiar"]
       ? { copiar: search["copiar"] }
-      : {},
+      : {}),
+    ...(search["estado"] === "pendiente" ? { estado: "pendiente" } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Registrar caja NAP reparada | Dovanet" },
@@ -33,7 +35,8 @@ export const Route = createFileRoute("/_authenticated/nueva")({
 });
 
 function NuevaNapPage() {
-  const { copiar } = Route.useSearch();
+  const { copiar, estado } = Route.useSearch();
+  const pendiente = estado === "pendiente";
 
   const { data: origen } = useQuery({
     queryKey: ["nap", copiar],
@@ -46,15 +49,25 @@ function NuevaNapPage() {
       <AppHeader />
       <main className="mx-auto w-full max-w-5xl px-4 py-6">
         <h1 className="font-display text-2xl font-semibold tracking-tight">
-          {copiar ? "Duplicar caja NAP" : "Registrar caja NAP reparada"}
+          {copiar
+            ? "Duplicar caja NAP"
+            : pendiente
+              ? "Cargar caja NAP pendiente de reparar"
+              : "Registrar caja NAP reparada"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {copiar
             ? "Los datos vienen del registro original: ajustá lo que cambie y guardá."
-            : "Marcá la ubicación, describí el trabajo y sumá las fotos de la intervención."}
+            : pendiente
+              ? "Marcá dónde está la caja y qué hay que reparar. Después podés cambiarla a en curso o finalizada."
+              : "Marcá la ubicación, describí el trabajo y sumá las fotos de la intervención."}
         </p>
 
-        <NapForm mode="crear" initial={origen ?? null} />
+        <NapForm
+          mode="crear"
+          initial={origen ?? null}
+          defaultEstado={pendiente ? "pendiente" : "finalizada"}
+        />
       </main>
     </div>
   );

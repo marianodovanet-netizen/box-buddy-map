@@ -46,9 +46,17 @@ type Props = {
   initial?: Nap | null;
   /** Keep existing photos (edit) or start empty (duplicate). */
   keepPhotos?: boolean;
+  /** Initial state for new records ("pendiente" for boxes still to repair). */
+  defaultEstado?: string;
 };
 
-export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Props) {
+export function NapForm({
+  mode,
+  napId,
+  initial = null,
+  keepPhotos = false,
+  defaultEstado = "finalizada",
+}: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, nombre } = useAuth();
@@ -71,7 +79,8 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
   const [direccion, setDireccion] = useState("");
   const [trabajo, setTrabajo] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [estado, setEstado] = useState<string>("finalizada");
+  const [estado, setEstado] = useState<string>(defaultEstado);
+  const pendiente = estado === "pendiente";
   const [hydrated, setHydrated] = useState(false);
 
   // Load values from the record being edited or duplicated (once).
@@ -150,7 +159,7 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
         fecha,
         localidad: localidad.trim(),
         direccion: direccion.trim(),
-        trabajo_realizado: trabajo.trim(),
+        trabajo_realizado: trabajo.trim() || "Pendiente de reparación",
         observaciones: observaciones.trim() || null,
         estado,
         lat: pin.lat,
@@ -322,14 +331,20 @@ export function NapForm({ mode, napId, initial = null, keepPhotos = false }: Pro
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="trabajo">Trabajo realizado</Label>
+          <Label htmlFor="trabajo">
+            {pendiente ? "Trabajo a realizar (opcional)" : "Trabajo realizado"}
+          </Label>
           <Textarea
             id="trabajo"
-            required
+            required={!pendiente}
             rows={4}
             value={trabajo}
             onChange={(e) => setTrabajo(e.target.value)}
-            placeholder="Cambio de splitter, resplice de fibra…"
+            placeholder={
+              pendiente
+                ? "Falla detectada, qué hay que reparar…"
+                : "Cambio de splitter, resplice de fibra…"
+            }
           />
         </div>
         <div className="space-y-2">
